@@ -2,11 +2,12 @@ import pygame
 pygame.init()
 
 gravedad = 1
-potencia_salto = -12
+potencia_salto = -10
 limite_velocidad_caida = 15
 W, H = 1200, 600
 
 velocidad_proyectil = 5
+contador_muerte = 0
 
 piso = pygame.Rect(0,0,W,20)
 
@@ -68,7 +69,7 @@ ataque_espada = [
     pygame.image.load("ranger/ataque espada/92.png")
     ]
 personaje_camina_izquierda = girar_imagenes(personaje_camina, True, False)
-lista_animaciones = [personaje_quieto, personaje_camina, personaje_camina_izquierda, personaje_salta, ataque_espada]
+lista_animaciones = [personaje_quieto, personaje_camina, personaje_camina_izquierda, personaje_salta]
 imagenes_reescaladas = reescalar_imagen(lista_animaciones, 30, 70)
 
 #ENEMIGO

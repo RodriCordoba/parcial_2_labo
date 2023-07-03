@@ -1,6 +1,5 @@
 import pygame, random
 from constantes import *
-#from nivel_1 import espada, grupo_plataformas
 
 def obtener_rectangulos(principal: pygame.Rect):
     diccionario = {}
@@ -39,8 +38,9 @@ class Personaje(pygame.sprite.Sprite):
         self.desplazamiento_x = 0
         self.esta_saltando = False
         self.tiene_escudo = False
+        self.atacando = False
 
-    def update(self, espada):
+    def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] and self.rect.right < W - self.velocidad:
             self.que_hace = "Derecha"
@@ -48,13 +48,13 @@ class Personaje(pygame.sprite.Sprite):
         elif keys[pygame.K_LEFT] and self.rect.left > self.velocidad:
             self.que_hace = "Izquierda"
             self.rect.x -= self.velocidad
-        elif keys[pygame.K_UP] and not self.esta_saltando:
+        elif keys[pygame.K_UP]:
             self.que_hace = "Salta"
             self.desplazamiento_y = -20
             self.esta_saltando = True
-        elif keys[pygame.K_SPACE]:
+        elif keys[pygame.K_q]:
             self.que_hace = "Atacando"
-            espada.atacando = True 
+            self.atacando = True
         else:
             self.que_hace = "Quieto"
             self.desplazamiento_x = 0
@@ -140,8 +140,8 @@ class Espada(pygame.sprite.Sprite):
         self.atacando = False
         self.contador_pasos = 0
 
-    def atacar(self):
-        self.atacando = True
+    #def atacar(self):
+        #self.atacando = True
 
     def animar_ataque(self, pantalla):
         largo = len(self.animacion_ataque)

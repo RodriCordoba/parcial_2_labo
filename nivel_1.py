@@ -20,9 +20,16 @@ grupo_plataformas.add(plataforma_1, plataforma_2)
 
 grupo_enemigos = Enemigo.generar_enemigos(2)
 
-espada = Espada(H/2 -230, 430, 40, ataque_espada)
-grupo_espadas = pygame.sprite.Group()
-grupo_espadas.add(espada)
+#atacando = False
+x = H/2 -230
+y = 430
+z = 40
+rectangulo_espada = pygame.Rect(x,y,z,z)
+lados_espada = obtener_rectangulos(rectangulo_espada)
+
+#espada = Espada(H/2 -230, 430, 40, ataque_espada)
+#grupo_espadas = pygame.sprite.Group()
+#grupo_espadas.add(espada)
 
 orbe = Orbe(500, 390)
 grupo_orbes = pygame.sprite.Group()
