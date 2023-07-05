@@ -38,7 +38,6 @@ class Personaje(pygame.sprite.Sprite):
         self.desplazamiento_x = 0
         self.esta_saltando = False
         self.tiene_escudo = False
-        self.atacando = False
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -53,8 +52,7 @@ class Personaje(pygame.sprite.Sprite):
             self.desplazamiento_y = -20
             self.esta_saltando = True
         elif keys[pygame.K_q]:
-            self.que_hace = "Atacando"
-            self.atacando = True
+            self.que_hace = "Atacando"  
         else:
             self.que_hace = "Quieto"
             self.desplazamiento_x = 0
@@ -129,104 +127,118 @@ class Enemigo(pygame.sprite.Sprite):
             enemigos.add(enemigo)
         return enemigos
     
+    def agregar_enemigos(enemigos_actuales, cantidad):
+        enemigos = pygame.sprite.Group(enemigos_actuales)
+
+        for _ in range(cantidad):
+            x = random.randint(0, W - 50)
+            y = random.randint(-200, -50)
+            enemigo = Enemigo(x, y, enemigo_camina)
+            enemigos.add(enemigo)
+
+        return enemigos
+    
 class Espada(pygame.sprite.Sprite):
-    def __init__(self, x, y, z, animacion_ataque):
+    def __init__(self, x, y, z):
         super().__init__()
-        self.animacion_ataque = animacion_ataque
         self.x = x
         self.y = y
         self.z = z
         self.rect = pygame.Rect(x, y, z, z)
-        self.atacando = False
-        self.contador_pasos = 0
-
-    #def atacar(self):
-        #self.atacando = True
-
-    def animar_ataque(self, pantalla):
-        largo = len(self.animacion_ataque)
-        self.contador_pasos += 1
-        if self.contador_pasos >= largo:
-            self.contador_pasos = 0
-
-        pantalla.blit(self.animacion_ataque[self.contador_pasos], self.rect.topleft)
 
 class Orbe(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.images = [
-            pygame.image.load("orbes/11.png"),
-            pygame.image.load("orbes/15.png"),
-            pygame.image.load("orbes/19.png"),
-            pygame.image.load("orbes/20.png")
-        ]
-        self.image = self.images[0]
+        self.image = pygame.image.load("orbes/20.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.lados = obtener_rectangulos(self.rect)
 
+proyectiles_juego = pygame.sprite.Group()  
+
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, imagenes_enemigo, imagen_proyectil):
+    def __init__(self):
         super().__init__()
-        self.imagenes = imagenes_enemigo
-        self.image = self.imagenes[0]
-        self.rect = self.image.get_rect()
-        self.rect.x = W - self.rect.width  
-        self.rect.y = H // 2 - self.rect.height // 2  
-        self.proyectil_image = pygame.image.load(imagen_proyectil)
-        self.proyectiles = pygame.sprite.Group()
-        self.contador_pasos = 0
+        self.imagen = pygame.image.load("enemigo/62.png")
+        self.rect = self.imagen.get_rect()
+        self.rect.right = W  
+        self.rect.bottom = 450
+        self.vida = 5
+        self.tiro_delay = 2000
+        self.ultimo_tiro = pygame.time.get_ticks()
 
     def update(self):
-        self.proyectiles.update()
-        self.contador_pasos += 1
-        if self.contador_pasos >= len(self.imagenes):
-            self.contador_pasos = 0
-        self.image = self.imagenes[self.contador_pasos]
 
-    def draw(self, pantalla):
-        pantalla.blit(self.image, self.rect)
-        self.proyectiles.draw(pantalla)
+        PANTALLA.blit(self.imagen, self.rect)
 
-    def lanzar_proyectil(self):
-        proyectil = Proyectil(self.proyectil_image, self.rect.x, self.rect.y)
-        self.proyectiles.add(proyectil)
+    def shoot_proyectil(self):
+        tiempo = pygame.time.get_ticks()
+        if tiempo - self.ultimo_tiro >= self.tiro_delay:
+            self.ultimo_tiro = tiempo
+
+            proyectil = Proyectil(self.rect.right, self.rect.centery, -5)
+            proyectiles_juego.add(proyectil)
 
 class Proyectil(pygame.sprite.Sprite):
-    def __init__(self, imagen_proyectil, x, y):
+    def __init__(self, x, y, velocidad):
         super().__init__()
-        self.image = pygame.image.load(imagen_proyectil)
-        self.rect = self.image.get_rect()
-        self.rect.x = x  
-        self.rect.y = y  
+        self.imagen = pygame.image.load("enemigo/67.png")
+        self.rect = self.imagen.get_rect()
+        self.rect.center = (x, y)
+        self.velocidad = velocidad
 
     def update(self):
-        self.rect.x -= velocidad_proyectil
+        self.rect.x += self.velocidad
+        PANTALLA.blit(self.imagen, self.rect)
+
+        if self.rect.right < 0 or self.rect.left > W:
+            self.kill()
+
 
 class Boton():
-	def __init__(self, imagen, escala, x, y):
-		super(Boton, self).__init__()
-		self.escala = escala
-		self.imagen = pygame.transform.smoothscale(imagen, self.escala)
-		self.rect = self.imagen.get_rect()
-		self.rect.x = x
-		self.rect.y = y
-		self.clickeado = False
+    def __init__(self, imagen, escala, x, y):
+        super(Boton, self).__init__()
+        self.escala = escala
+        self.imagen = pygame.transform.smoothscale(imagen, self.escala)
+        self.rect = self.imagen.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clickeado = False
+        self.estado_volumen = True
 
-	def actualizar_imagen(self, imagen):
-		self.imagen = pygame.transform.smoothscale(imagen, self.escala)
+    def actualizar_imagen(self, imagen):
+        self.imagen = pygame.transform.smoothscale(imagen, self.escala)
 
-	def renderizar(self, pantalla):
-		accionar = False
-		posicion = pygame.mouse.get_pos()
-		if self.rect.collidepoint(posicion):
-			if pygame.mouse.get_pressed()[0] and not self.clickeado:
-				accionar = True
-				self.clickeado = True
+    def renderizar(self, pantalla):
+        accionar = False
+        posicion = pygame.mouse.get_pos()
+        if self.rect.collidepoint(posicion):
+            if pygame.mouse.get_pressed()[0] and not self.clickeado:
+                accionar = True
+                self.clickeado = True 
+            if not pygame.mouse.get_pressed()[0]:
+                self.clickeado = False
 
-			if not pygame.mouse.get_pressed()[0]:
-				self.clickeado = False
+        pantalla.blit(self.imagen, self.rect)
+        return accionar
+    
+    def on_off_volumen(self, pantalla):
+        accionar = False
+        posicion = pygame.mouse.get_pos()
+        if self.rect.collidepoint(posicion):
+            if pygame.mouse.get_pressed()[0] and not self.clickeado:
+                accionar = True
+                self.clickeado = True
 
-		pantalla.blit(self.imagen, self.rect)
-		return accionar 
+                self.estado_volumen = not self.estado_volumen
+                if self.estado_volumen:
+                    pygame.mixer.music.set_volume(0.2)
+                else:
+                    pygame.mixer.music.set_volume(0.0)
+
+            if not pygame.mouse.get_pressed()[0]:
+                self.clickeado = False
+
+        pantalla.blit(self.imagen, self.rect)
+        return accionar

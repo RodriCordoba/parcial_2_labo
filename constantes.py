@@ -2,7 +2,7 @@ import pygame
 pygame.init()
 
 gravedad = 1
-potencia_salto = -10
+potencia_salto = -11
 limite_velocidad_caida = 15
 W, H = 1200, 600
 
@@ -30,6 +30,7 @@ UBICACION_FONDO_INICIO = "fondo_inicio.png"
 UBICACION_FONDO_PAUSA = "fondo_opciones.png"
 UBICACION_FONDO_PERDISTE = "fondo_perdiste.png"
 UBICACION_FONDO_RANKING = "fondo_ranking.png"
+UBICACION_FONDO_GANASTE = "fondo_ganaste.png"
 
 #BOTONES
 UBICACION_BOTON_JUGAR = "botones/jugar.png"
@@ -38,6 +39,11 @@ UBICACION_BOTON_RANKING = "botones/ranking.png"
 UBICACION_BOTON_SALIR = "botones/salir.png"
 UBICACION_BOTON_GUARDAR = "botones/guardar.png"
 UBICACION_BOTON_VOLVER = "botones/volver.png"
+UBICACION_BOTON_NIVEL_1 = "botones/01.png"
+UBICACION_BOTON_NIVEL_2 = "botones/02.png"
+UBICACION_BOTON_NIVEL_3 = "botones/03.png"
+UBICACION_BOTON_SELECTOR_NIVELES = "botones/Levels.png"
+UBICACION_BOTON_ON_OFF_SONIDO = "botones/Volume.png"
 
 #AUDIO 
 UBICACION_SONIDO_CLICK = "audio/click.mp3"
