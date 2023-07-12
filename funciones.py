@@ -1,6 +1,6 @@
 import pygame, sys, time
 from objetos import *
-from nivel_1 import *
+from constantes import *
 from modo import *
 from base_de_datos import crear_tablas_db, insertar_jugador, obtener_ranking
 pygame.init()
@@ -44,13 +44,15 @@ salir_boton_ganaste = Boton(salir_imagen, (120, 50), centrar(salir_imagen)+ 200,
 nivel_1_boton = Boton(nivel_1_imagen, (40, 40), centrar(nivel_1_imagen)- 200, H/2)
 nivel_2_boton = Boton(nivel_2_imagen, (40, 40), centrar(nivel_2_imagen), H/2)
 nivel_3_boton = Boton(nivel_3_imagen, (40, 40), centrar(nivel_3_imagen)+ 200, H/2)
-on_off_boton = Boton(on_off_volumen_imagen, (40, 40), 160, H-580)
+on_off_boton = Boton(on_off_volumen_imagen, (40, 40), 620, H-350)
+selector_boton = Boton(selector_imagen, (40, 40), 550, H-350)
 
 jugar_boton_centrado_inicio = Boton(jugar_imagen, (160, 60), 500, H-310)
 ranking_boton_inicio = Boton(ranking_imagen, (140, 50), 280, H-305)
 salir_boton_inicio = Boton(salir_imagen, (140, 50), 740, H-305)
 
 volver_boton_centrado_opciones = Boton(volver_imagen, (150, 50), 410, H-220)
+volver_boton_centrado_niveles = Boton(volver_imagen, (120, 50), centrar(volver_imagen)-219, H-220)
 salir_boton_opciones = Boton(salir_imagen, (150, 50), 650, H-220)
 
 jugar_boton_centrado_ranking = Boton(jugar_imagen, (150, 50), 310, H-180)
@@ -111,6 +113,9 @@ def iniciar_bucle_juego_3(volumen):
 def seleccion_jugar(volumen):
     modo_empezar_jugar = True
     audio_jugar = pygame.mixer.Sound(UBICACION_SONIDO_INICIAR)
+    audio_nivel_1 = pygame.mixer.Sound(UBICACION_SONIDO_NIVEL_1)
+    audio_nivel_2 = pygame.mixer.Sound(UBICACION_SONIDO_NIVEL_2)
+    audio_nivel_3 = pygame.mixer.Sound(UBICACION_SONIDO_NIVEL_3)
 
     while modo_empezar_jugar:
         for evento in pygame.event.get():
@@ -122,29 +127,37 @@ def seleccion_jugar(volumen):
         PANTALLA.blit(fondo_iniciar, (0, 0))
         if nivel_1_boton.renderizar(PANTALLA):
             audio_jugar.play()
+            audio_nivel_1.play()
             modo_empezar_jugar = iniciar_bucle_juego_1(volumen)
             print("ejecutando nivel 1 ")
         if nivel_2_boton.renderizar(PANTALLA):
             audio_jugar.play()
+            audio_nivel_2.play()
             modo_empezar_jugar = iniciar_bucle_juego_2(volumen)
             print("ejecutando nivel 2 ")
         if nivel_3_boton.renderizar(PANTALLA):
             audio_jugar.play()
+            audio_nivel_3.play()
             modo_empezar_jugar = iniciar_bucle_juego_3(volumen)
             print("ejecutando nivel 3 ")
-
+        if volver_boton_centrado_niveles.renderizar(PANTALLA):
+            iniciar_juego(volumen)
         pygame.display.flip()
 
-def mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo):
-    fuente = pygame.font.SysFont("Arial", 28)
+def mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo, vidas, escudo):
+    fuente = pygame.font.SysFont("Arial", 24)
     enemigos_eliminados_texto = fuente.render("Enemigos eliminados: " + str(enemigos_eliminados), True, "Yellow")
     puntuacion_texto = fuente.render("Puntuacion: " + str(puntuacion), True, "Yellow")
     nivel_texto = fuente.render("Nivel: " + str(nivel), True, "Yellow")
     tiempo_texto = fuente.render("Tiempo: " + str(tiempo//1000) + " segundos", True, "Yellow")
-    PANTALLA.blit(enemigos_eliminados_texto, (10,H - 70))
-    PANTALLA.blit(puntuacion_texto, (10,H - 45))
-    PANTALLA.blit(nivel_texto, (700, H - 70))
-    PANTALLA.blit(tiempo_texto, (700, H - 45))
+    vidas_texto = fuente.render("Vidas: " + str(vidas), True, "Yellow")
+    escudo_texto = fuente.render("Escudo: " + str(escudo), True, "Yellow")
+    PANTALLA.blit(enemigos_eliminados_texto, (700,H - 585))
+    PANTALLA.blit(puntuacion_texto, (700,H - 560))
+    PANTALLA.blit(nivel_texto, (1000, H - 585))
+    PANTALLA.blit(tiempo_texto, (1000, H - 560))
+    PANTALLA.blit(vidas_texto, (500, H - 585))
+    PANTALLA.blit(escudo_texto, (500, H - 560))
 
 def ranking(volumen=0.2):
     modo_ranking = True
@@ -184,7 +197,6 @@ def ranking(volumen=0.2):
             audio_click.play()
             modo_ranking = False
             iniciar_juego(volumen)
-
         pygame.display.flip()
 
 def pausa(volume_parametro):
@@ -235,11 +247,13 @@ def pausa(volume_parametro):
             audio_click.play()
             modo_pausa = False
             sys.exit()
+        if selector_boton.renderizar(PANTALLA):
+            seleccion_jugar(volumen)  
+        on_off_boton.on_off_volumen(PANTALLA)
         pygame.display.flip()
 
         tiempo_actual_pausa = pygame.time.get_ticks()
         tiempo_pausa = tiempo_actual_pausa - tiempo_inicial_pausa
-
     retorno = {
         "volumen": volumen,
         "tiempo_pausa": tiempo_pausa
@@ -283,7 +297,6 @@ def perdiste(puntuacion, volumen):
             audio_click.play()
             modo_perdiste = False
             sys.exit()
-        
         pygame.display.flip()
 
 def ganaste(puntuacion, volumen):
@@ -326,33 +339,34 @@ def ganaste(puntuacion, volumen):
         if jugar_boton_ganaste.renderizar(PANTALLA):
             audio_click.play()
             seleccion_jugar(volumen)
-
         pygame.display.flip()
 
-def aplicar_gravedad(pantalla, personaje_animacion, rectangulo_personaje: pygame.Rect, pisos: pygame.Rect):
+def aplicar_gravedad(pantalla, personaje, pisos, plataformas):
     if personaje.esta_saltando:
-        animar_personaje(pantalla, rectangulo_personaje["main"], personaje_animacion)
-
-        for lado in rectangulo_personaje:
-            rectangulo_personaje[lado].y += personaje.desplazamiento_y
-
-        if personaje.desplazamiento_y + gravedad < limite_velocidad_caida:
-            personaje.desplazamiento_y += gravedad
-        
-    for plataforma in pisos:
-        if rectangulo_personaje["bottom"].colliderect(plataforma["top"]):
-            personaje.esta_saltando = False
-            personaje.desplazamiento_y = 0
-            rectangulo_personaje["main"].bottom = plataforma["main"].top + 1
-            break
-        else:
-            personaje.esta_saltando = True
+        animar_personaje(pantalla, personaje.lados["main"], personaje_salta, personaje)
+        personaje.desplazamiento_y += gravedad
+    else:
+        colision_piso = False
+        for piso in pisos:
+            if personaje.lados["bottom"].colliderect(piso["main"]):
+                colision_piso = True
+                personaje.rect.bottom = piso["main"].top + 1
+                break
+        if not colision_piso:
+            personaje.desplazamiento_y += gravedad 
+        plataforma_colisionada = pygame.sprite.spritecollideany(personaje, plataformas)
+        if plataforma_colisionada:
+            if personaje.rect.bottom <= plataforma_colisionada.rect.centery:
+                personaje.rect.bottom = plataforma_colisionada.rect.top + 1
+                personaje.esta_saltando = False
+                personaje.desplazamiento_y = 0
+    personaje.rect.y += personaje.desplazamiento_y
 
 def mover(rectangulo: pygame.rect, velocidad):
     for lado in rectangulo:
         rectangulo[lado].x += velocidad
 
-def animar_personaje(pantalla, rectangulo, accion):
+def animar_personaje(pantalla, rectangulo, accion, personaje):
     largo = len(accion)
     if personaje.contador_pasos >= largo:
         personaje.contador_pasos = 0
@@ -360,39 +374,91 @@ def animar_personaje(pantalla, rectangulo, accion):
     pantalla.blit(accion[personaje.contador_pasos], rectangulo)
     personaje.contador_pasos += 1
 
-def actualizar_pantalla(pantalla, que_hace, lados_personaje, velocidad, plataformas, que_hace_enemigo, lados_enemigo):
+def actualizar_pantalla(pantalla, lados_piso, grupo_enemigos, grupo_plataformas, orbe, personaje):
     pantalla.blit(fondo, (0,0))
     for plataforma in grupo_plataformas:
         pantalla.blit(plataforma.image, plataforma.rect)
     pantalla.blit(orbe.image, orbe.rect)
-
-    match que_hace:
+    match personaje.que_hace:
         case "Derecha":
             if not personaje.esta_saltando:
-                animar_personaje(pantalla, lados_personaje["main"], personaje_camina)
-            mover(lados_personaje, velocidad)
+                animar_personaje(pantalla, personaje.lados["main"], personaje_camina, personaje)
+            mover(personaje.lados, personaje.velocidad)
         case "Izquierda":
             if not personaje.esta_saltando:
-                animar_personaje(pantalla, lados_personaje["main"], personaje_camina_izquierda)
-            mover(lados_personaje, velocidad*-1)
+                animar_personaje(pantalla, personaje.lados["main"], personaje_camina_izquierda, personaje)
+            mover(personaje.lados, personaje.velocidad*-1)
         case "Salta":
             if not personaje.esta_saltando:
                 personaje.esta_saltando = True
                 personaje.desplazamiento_y = potencia_salto
         case "Quieto":
             if not personaje.esta_saltando:
-                animar_personaje(pantalla, lados_personaje["main"], personaje_quieto)
-        case "Atacando":
+                if personaje.direccion == "derecha":
+                    animar_personaje(pantalla, personaje.lados["main"], personaje_quieto, personaje)
+                else:
+                    animar_personaje(pantalla, personaje.lados["main"], personaje_quieto_izquierda, personaje)
+        case "Ataque_derecha":
             if not personaje.esta_saltando:
-                animar_personaje(pantalla, lados_personaje["main"], ataque_espada)
-    match que_hace_enemigo:
-        case "derecha":
-            animar_personaje(pantalla, lados_enemigo["main"], enemigo_camina)
-        case "izquierda":
-            animar_personaje(pantalla, lados_enemigo["main"], enemigo_camina_izquierda)
-        case "quieto":
-            animar_personaje(pantalla, lados_enemigo["main"], enemigo_quieto)  
-    aplicar_gravedad(pantalla, personaje_salta, lados_personaje, plataformas)
+                animar_personaje(pantalla, personaje.lados["main"], ataque_espada, personaje)
+        case "Ataque_izquierda":
+            if not personaje.esta_saltando:
+                rectangulo_copia = personaje.lados['main'].copy()
+                rectangulo_copia.x -= 45
+                animar_personaje(pantalla, rectangulo_copia, ataque_espada_izquierda, personaje)
+    for enemigo in grupo_enemigos:
+        match enemigo.que_hace:
+            case "derecha":
+                animar_personaje(pantalla, enemigo.lados["main"], enemigo_camina, enemigo)
+            case "izquierda":
+                animar_personaje(pantalla, enemigo.lados["main"], enemigo_camina_izquierda, enemigo)
+            case "quieto":
+                animar_personaje(pantalla, enemigo.lados["main"], enemigo_quieto, enemigo)
+        enemigo.update(grupo_plataformas)
+    aplicar_gravedad(PANTALLA, personaje, lados_piso, grupo_plataformas)
+def actualizar_pantalla_boss(pantalla, lados_piso, grupo_enemigos, grupo_plataformas, orbe, personaje, boss):
+    pantalla.blit(fondo, (0,0))
+    for plataforma in grupo_plataformas:
+        pantalla.blit(plataforma.image, plataforma.rect)
+    pantalla.blit(orbe.image, orbe.rect)
+    pantalla.blit(boss.imagen, boss.rect)
+    match personaje.que_hace:
+        case "Derecha":
+            if not personaje.esta_saltando:
+                animar_personaje(pantalla, personaje.lados["main"], personaje_camina, personaje)
+            mover(personaje.lados, personaje.velocidad)
+        case "Izquierda":
+            if not personaje.esta_saltando:
+                animar_personaje(pantalla, personaje.lados["main"], personaje_camina_izquierda, personaje)
+            mover(personaje.lados, personaje.velocidad*-1)
+        case "Salta":
+            if not personaje.esta_saltando:
+                personaje.esta_saltando = True
+                personaje.desplazamiento_y = potencia_salto
+        case "Quieto":
+            if not personaje.esta_saltando:
+                if personaje.direccion == "derecha":
+                    animar_personaje(pantalla, personaje.lados["main"], personaje_quieto, personaje)
+                else:
+                    animar_personaje(pantalla, personaje.lados["main"], personaje_quieto_izquierda, personaje)
+        case "Ataque_derecha":
+            if not personaje.esta_saltando:
+                animar_personaje(pantalla, personaje.lados["main"], ataque_espada, personaje)
+        case "Ataque_izquierda":
+            if not personaje.esta_saltando:
+                rectangulo_copia = personaje.lados['main'].copy()
+                rectangulo_copia.x -= 45
+                animar_personaje(pantalla, rectangulo_copia, ataque_espada_izquierda, personaje)
+    for enemigo in grupo_enemigos:
+        match enemigo.que_hace:
+            case "derecha":
+                animar_personaje(pantalla, enemigo.lados["main"], enemigo_camina, enemigo)
+            case "izquierda":
+                animar_personaje(pantalla, enemigo.lados["main"], enemigo_camina_izquierda, enemigo)
+            case "quieto":
+                animar_personaje(pantalla, enemigo.lados["main"], enemigo_quieto, enemigo)
+        enemigo.update(grupo_plataformas)
+    aplicar_gravedad(PANTALLA, personaje, lados_piso, grupo_plataformas)
 
 def animar_muerte_enemigo(pantalla, enemigo_muere, rectangulo_enemigo): 
     global contador_muerte
@@ -414,11 +480,13 @@ def bucle_de_juego_nivel_1(volumen_parametro = 0.2):
     pygame.mixer.music.play(loops=-1)
     volumen = volumen_parametro
     pygame.mixer.music.set_volume(volumen)
+    sonido_muere_personaje = pygame.mixer.Sound(UBICACION_SONIDO_RANGER_MUERE)
+    sonido_muere_enemigo = pygame.mixer.Sound(UBICACION_SONIDO_ENEMIGO_MUERE)
     #TEXTO
     fuente = pygame.font.SysFont("Arial", 100)
     perdiste_texto = fuente.render("Perdiste!", 0, "Red")
     #FONDO
-    fondo = pygame.image.load("fondo_ciudad.jpg")
+    fondo = pygame.image.load("fondos/fondo_ciudad.jpg")
     fondo = pygame.transform.scale(fondo, (W,H))
     #FPS
     FPS = 15
@@ -442,21 +510,31 @@ def bucle_de_juego_nivel_1(volumen_parametro = 0.2):
     #ESPADA
     espada = Espada(H/2 -230, 430, 40)
     rectangulo_espada = pygame.Rect(espada.x,espada.y,espada.z,espada.z)
+    rectangulo_espada_izquierda = pygame.Rect(espada.x, espada.y,espada.z,espada.z)
     lados_espada = obtener_rectangulos(rectangulo_espada)
+    lados_espada_izquierda = obtener_rectangulos(rectangulo_espada_izquierda)
     #ORBE
-    orbe = Orbe(480, 390)
+    orbe = Orbe(H/2 -250, 390)
     grupo_orbes = pygame.sprite.Group()
     grupo_orbes.add(orbe)
     #PUNTUACION 
     enemigos_eliminados = 0
     nivel = 1
     puntuacion = 0
-    tiempo = 0
+    tiempo = 180000
     juego_corriendo = True
+    vidas = 3
+    tiempo_colision = 0
 
     while juego_corriendo:
         milisegundos = RELOJ.tick(FPS)
-        tiempo += milisegundos
+        tiempo -= milisegundos
+        if tiempo < 1:
+            PANTALLA.blit(fondo_perdiste, (0,0))
+            PANTALLA.blit(perdiste_texto, (450, 250))
+            pygame.display.flip()
+            time.sleep(2)
+            perdiste(puntuacion, volumen)
         #EVENTOS 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -472,7 +550,10 @@ def bucle_de_juego_nivel_1(volumen_parametro = 0.2):
         personaje.update()
         rectangulo_espada.x = personaje.rect.x +45
         rectangulo_espada.y = personaje.rect.y 
+        rectangulo_espada_izquierda.x = personaje.rect.x -45
+        rectangulo_espada_izquierda.y = personaje.rect.y 
         lados_espada = obtener_rectangulos(rectangulo_espada)
+        lados_espada_izquierda = obtener_rectangulos(rectangulo_espada_izquierda)
         personaje.esta_saltando = False
         orbe.update()
 
@@ -486,35 +567,65 @@ def bucle_de_juego_nivel_1(volumen_parametro = 0.2):
         grupo_plataformas.draw(PANTALLA)
 
         for enemigo in grupo_enemigos:
-            if personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo==False:
-                print("Personaje eliminado!")
-                PANTALLA.blit(fondo_perdiste, (0,0))
-                PANTALLA.blit(perdiste_texto, (450, 250))
-                pygame.display.flip()
-                time.sleep(2)
-                perdiste(puntuacion, volumen)
-            elif personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo==True:
-                print("ataque bloqueado")
-                personaje.tiene_escudo = False
-            elif personaje.que_hace == "Atacando" and enemigo.lados["main"].colliderect(rectangulo_espada):
+            if personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo == False and vidas == 0:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700: 
+                    sonido_muere_personaje.play()
+                    print("Personaje eliminado!")
+                    PANTALLA.blit(fondo_perdiste, (0,0))
+                    PANTALLA.blit(perdiste_texto, (450, 250))
+                    pygame.display.flip()
+                    time.sleep(2)
+                    perdiste(puntuacion, volumen)
+            elif personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo == True:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700:
+                    print("ataque bloqueado")
+                    personaje.tiene_escudo = False
+                    tiempo_colision = 0 
+            elif personaje.lados['main'].colliderect(enemigo.lados['main']) and personaje.tiene_escudo == False:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700:
+                    vidas -= 1
+                    tiempo_colision = 0
+            elif (personaje.que_hace == "Ataque_derecha" and enemigo.lados["main"].colliderect(rectangulo_espada))or(personaje.que_hace == "Ataque_izquierda" and enemigo.lados["main"].colliderect(rectangulo_espada_izquierda)):
+                sonido_muere_enemigo.play()
                 animar_muerte_enemigo(PANTALLA, enemigo_muere, enemigo.lados["main"])
                 eliminar_enemigo(enemigo.lados["main"])
                 print("Enemigo eliminado por ataque de espada!")
                 grupo_enemigos = Enemigo.agregar_enemigos(grupo_enemigos, 1)
                 puntuacion += 50
                 enemigos_eliminados += 1
+                if vidas < 3:
+                    vidas += 1
             enemigo.update(grupo_plataformas)
-
+            tiempo_anterior = pygame.time.get_ticks()
         if enemigos_eliminados > 3:
             ganaste(puntuacion, volumen)
 
-        actualizar_pantalla(PANTALLA, personaje.que_hace, personaje.lados, personaje.velocidad, lista_plataformas, enemigo.que_hace, enemigo.lados)
+        actualizar_pantalla(PANTALLA, lista_plataformas, grupo_enemigos, grupo_plataformas, orbe, personaje)
+        for proyectil in proyectiles_juego_personaje:
+            proyectil.update()
+            PANTALLA.blit(proyectil.imagen, proyectil.rect)
+
+            for enemigo in grupo_enemigos:
+                if proyectil.rect.colliderect(enemigo.rect):
+                    sonido_muere_enemigo.play()
+                    animar_muerte_enemigo(PANTALLA, enemigo_muere, enemigo.lados['main'])
+                    eliminar_enemigo(enemigo.lados['main'])
+                    grupo_enemigos = Enemigo.agregar_enemigos(grupo_enemigos, 1)
+                    proyectil.kill()
+                    puntuacion += 70
+                    enemigos_eliminados += 1
+
         if get_mode():
             for lado in personaje.lados:
                 pygame.draw.rect(PANTALLA, "Blue", personaje.lados[lado], 2)
 
             for lado in lados_espada:
                 pygame.draw.rect(PANTALLA, "Red", lados_espada[lado], 2)
+            for lado in lados_espada_izquierda:
+                pygame.draw.rect(PANTALLA, "Red", lados_espada_izquierda[lado], 2)
 
             for lado in lados_piso:
                 pygame.draw.rect(PANTALLA, "Green", lados_piso[lado], 2)
@@ -527,30 +638,27 @@ def bucle_de_juego_nivel_1(volumen_parametro = 0.2):
                 for lado in enemigo.lados:
                     pygame.draw.rect(PANTALLA, "Cyan", enemigo.lados[lado], 2)
 
-            for lado in orbe.lados:
-                pygame.draw.rect(PANTALLA, "Magenta", orbe.lados[lado], 2)
-
         #BOTON PAUSA
         if pausar_boton.renderizar(PANTALLA):
             retorno = pausa(volumen)
             volumen = retorno['volumen']
-            tiempo -= retorno['tiempo_pausa']
-        on_off_boton.on_off_volumen(PANTALLA)         
-        mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo)
+            tiempo -= retorno['tiempo_pausa']     
+        mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo, vidas, personaje.tiene_escudo)
         pygame.display.flip()
-
 
 def bucle_de_juego_nivel_2(volumen_parametro = 0.2):
     #MUSICA
     pygame.mixer.music.load(UBICACION_SONIDO_MUSICA_MENU)
     pygame.mixer.music.play(loops=-1)
     volumen = volumen_parametro
+    sonido_muere_personaje = pygame.mixer.Sound(UBICACION_SONIDO_RANGER_MUERE)
+    sonido_muere_enemigo = pygame.mixer.Sound(UBICACION_SONIDO_ENEMIGO_MUERE)
     pygame.mixer.music.set_volume(volumen)
     #TEXTO
     fuente = pygame.font.SysFont("Arial", 100)
     perdiste_texto = fuente.render("Perdiste!", 0, "Red")
     #FONDO
-    fondo = pygame.image.load("fondo_ciudad.jpg")
+    fondo = pygame.image.load("fondos/fondo_ciudad.jpg")
     fondo = pygame.transform.scale(fondo, (W,H))
     #FPS
     FPS = 15
@@ -562,33 +670,63 @@ def bucle_de_juego_nivel_2(volumen_parametro = 0.2):
     #PLATAFORMAS
     piso.top = personaje.rect.bottom
     lados_piso = obtener_rectangulos(piso)
-    plataforma_1 = Plataforma(380, 460, ("fondos/13.png"))
-    plataforma_2 = Plataforma(1000, 460, ("fondos/14.png"))
+    plataforma_1 = Plataforma(250, 460, ("fondos/13.png"))
+    plataforma_2 = Plataforma(365, 460, ("fondos/7.png"))
+    plataforma_3 = Plataforma(365, 400, ("fondos/14.png"))
+    plataforma_4 = Plataforma(480, 400, ("fondos/14.png"))
+    plataforma_5 = Plataforma(480, 460, ("fondos/7.png"))
+    plataforma_6 = Plataforma(595, 460, ("fondos/7.png"))
+    plataforma_7 = Plataforma(595, 400, ("fondos/7.png"))
+    plataforma_8 = Plataforma(595, 340, ("fondos/7.png"))
+    plataforma_9 = Plataforma(710, 400, ("fondos/7.png"))
+    plataforma_10 = Plataforma(710, 460, ("fondos/7.png"))
+    plataforma_11 = Plataforma(825, 460, ("fondos/13.png"))
     lados_plataforma = obtener_rectangulos(plataforma_1.rect)
     lados_plataforma_2 = obtener_rectangulos(plataforma_2.rect)
-    lista_plataformas = [lados_piso, lados_plataforma, lados_plataforma_2]
+    lados_plataforma_3 = obtener_rectangulos(plataforma_3.rect)
+    lados_plataforma_4 = obtener_rectangulos(plataforma_4.rect)
+    lados_plataforma_5 = obtener_rectangulos(plataforma_5.rect)
+    lados_plataforma_6 = obtener_rectangulos(plataforma_6.rect)
+    lados_plataforma_7 = obtener_rectangulos(plataforma_7.rect)
+    lados_plataforma_8 = obtener_rectangulos(plataforma_8.rect)
+    lados_plataforma_9 = obtener_rectangulos(plataforma_9.rect)
+    lados_plataforma_10 = obtener_rectangulos(plataforma_10.rect)
+    lados_plataforma_11 = obtener_rectangulos(plataforma_11.rect)
+    lista_plataformas = [lados_piso, lados_plataforma, lados_plataforma_2, lados_plataforma_3, lados_plataforma_4, lados_plataforma_5, lados_plataforma_6, lados_plataforma_7, lados_plataforma_8, lados_plataforma_9, lados_plataforma_10, lados_plataforma_11]
     grupo_plataformas = pygame.sprite.Group()
-    grupo_plataformas.add(plataforma_1, plataforma_2)
+    grupo_plataformas.add(plataforma_1, plataforma_2, plataforma_3, plataforma_4, plataforma_5, plataforma_6, plataforma_7, plataforma_8, plataforma_9, plataforma_10, plataforma_11)
     #ENEMIGO
-    grupo_enemigos = Enemigo.generar_enemigos(3)
+    grupo_enemigos = Enemigo.generar_enemigos(5)
     #ESPADA
     espada = Espada(H/2 -230, 430, 40)
     rectangulo_espada = pygame.Rect(espada.x,espada.y,espada.z,espada.z)
+    rectangulo_espada_izquierda = pygame.Rect(espada.x, espada.y,espada.z,espada.z)
     lados_espada = obtener_rectangulos(rectangulo_espada)
+    lados_espada_izquierda = obtener_rectangulos(rectangulo_espada_izquierda)
     #ORBE
-    orbe = Orbe(480, 390)
+    orbe = Orbe(620, 200)
     grupo_orbes = pygame.sprite.Group()
     grupo_orbes.add(orbe)
     #PUNTUACION 
     enemigos_eliminados = 0
-    nivel = 1
+    nivel = 2
     puntuacion = 0
-    tiempo = 0
+    tiempo = 180000
     juego_corriendo = True
+    vidas = 3
+    tiempo_colision = 0
 
     while juego_corriendo:
         milisegundos = RELOJ.tick(FPS)
-        tiempo += milisegundos
+        tiempo -= milisegundos
+        if tiempo < 0:
+            sonido_muere_personaje.play()
+            PANTALLA.blit(fondo_perdiste, (0,0))
+            PANTALLA.blit(perdiste_texto, (450, 250))
+            sonido_muere_personaje.play()
+            pygame.display.flip()
+            time.sleep(2)
+            perdiste(puntuacion, volumen)
         #EVENTOS 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -603,8 +741,11 @@ def bucle_de_juego_nivel_2(volumen_parametro = 0.2):
 
         personaje.update()
         rectangulo_espada.x = personaje.rect.x +45
-        rectangulo_espada.y = personaje.rect.y 
+        rectangulo_espada.y = personaje.rect.y
+        rectangulo_espada_izquierda.x = personaje.rect.x -45
+        rectangulo_espada_izquierda.y = personaje.rect.y 
         lados_espada = obtener_rectangulos(rectangulo_espada)
+        lados_espada_izquierda = obtener_rectangulos(rectangulo_espada_izquierda)
         personaje.esta_saltando = False
         orbe.update()
 
@@ -618,35 +759,65 @@ def bucle_de_juego_nivel_2(volumen_parametro = 0.2):
         grupo_plataformas.draw(PANTALLA)
 
         for enemigo in grupo_enemigos:
-            if personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo==False:
-                print("Personaje eliminado!")
-                PANTALLA.blit(fondo_perdiste, (0,0))
-                PANTALLA.blit(perdiste_texto, (450, 250))
-                pygame.display.flip()
-                time.sleep(2)
-                perdiste(puntuacion, volumen)
-            elif personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo==True:
-                print("ataque bloqueado")
-                personaje.tiene_escudo = False
-            elif personaje.que_hace == "Atacando" and enemigo.lados["main"].colliderect(rectangulo_espada):
+            if personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo == False and vidas == 0:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700: 
+                    sonido_muere_personaje.play()
+                    print("Personaje eliminado!")
+                    PANTALLA.blit(fondo_perdiste, (0,0))
+                    PANTALLA.blit(perdiste_texto, (450, 250))
+                    pygame.display.flip()
+                    time.sleep(2)
+                    perdiste(puntuacion, volumen)
+            elif personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo == True:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700:
+                    print("ataque bloqueado")
+                    personaje.tiene_escudo = False
+                    tiempo_colision = 0 
+            elif personaje.lados['main'].colliderect(enemigo.lados['main']) and personaje.tiene_escudo == False:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700:
+                    vidas -= 1
+                    tiempo_colision = 0
+            elif (personaje.que_hace == "Ataque_derecha" and enemigo.lados["main"].colliderect(rectangulo_espada))or(personaje.que_hace == "Ataque_izquierda" and enemigo.lados["main"].colliderect(rectangulo_espada_izquierda)):
+                sonido_muere_enemigo.play()
                 animar_muerte_enemigo(PANTALLA, enemigo_muere, enemigo.lados["main"])
                 eliminar_enemigo(enemigo.lados["main"])
                 print("Enemigo eliminado por ataque de espada!")
                 grupo_enemigos = Enemigo.agregar_enemigos(grupo_enemigos, 1)
                 puntuacion += 50
                 enemigos_eliminados += 1
+                if vidas < 3:
+                    vidas += 1
             enemigo.update(grupo_plataformas)
-
-        if enemigos_eliminados > 4:
+            tiempo_anterior = pygame.time.get_ticks()
+        if enemigos_eliminados > 6:
             ganaste(puntuacion, volumen)
 
-        actualizar_pantalla(PANTALLA, personaje.que_hace, personaje.lados, personaje.velocidad, lista_plataformas, enemigo.que_hace, enemigo.lados)
+        actualizar_pantalla(PANTALLA, lista_plataformas, grupo_enemigos, grupo_plataformas, orbe, personaje)
+
+        for proyectil in proyectiles_juego_personaje:
+            proyectil.update()
+            PANTALLA.blit(proyectil.imagen, proyectil.rect)
+
+            for enemigo in grupo_enemigos:
+                if proyectil.rect.colliderect(enemigo.rect):
+                    sonido_muere_enemigo.play()
+                    animar_muerte_enemigo(PANTALLA, enemigo_muere, enemigo.lados['main'])
+                    eliminar_enemigo(enemigo.lados['main'])
+                    grupo_enemigos = Enemigo.agregar_enemigos(grupo_enemigos, 1)
+                    proyectil.kill()
+                    puntuacion += 70
+                    enemigos_eliminados += 1
         if get_mode():
             for lado in personaje.lados:
                 pygame.draw.rect(PANTALLA, "Blue", personaje.lados[lado], 2)
 
             for lado in lados_espada:
                 pygame.draw.rect(PANTALLA, "Red", lados_espada[lado], 2)
+            for lado in lados_espada_izquierda:
+                pygame.draw.rect(PANTALLA, "Red", lados_espada_izquierda[lado], 2)
 
             for lado in lados_piso:
                 pygame.draw.rect(PANTALLA, "Green", lados_piso[lado], 2)
@@ -654,23 +825,27 @@ def bucle_de_juego_nivel_2(volumen_parametro = 0.2):
             for lado in lados_plataforma:
                 pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma[lado], 2)
                 pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_2[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_3[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_4[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_5[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_6[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_7[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_8[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_9[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_10[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_11[lado], 2)
 
             for enemigo in grupo_enemigos:
                 for lado in enemigo.lados:
                     pygame.draw.rect(PANTALLA, "Cyan", enemigo.lados[lado], 2)
 
-            for lado in orbe.lados:
-                pygame.draw.rect(PANTALLA, "Magenta", orbe.lados[lado], 2)
-
         #BOTON PAUSA
         if pausar_boton.renderizar(PANTALLA):
             retorno = pausa(volumen)
             volumen = retorno['volumen']
-            tiempo -= retorno['tiempo_pausa']
-        on_off_boton.on_off_volumen(PANTALLA)         
-        mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo)
+            tiempo -= retorno['tiempo_pausa']      
+        mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo, vidas, personaje.tiene_escudo)
         pygame.display.flip()
-
 
 def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
     #MUSICA
@@ -678,11 +853,13 @@ def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
     pygame.mixer.music.play(loops=-1)
     volumen = volumen_parametro
     pygame.mixer.music.set_volume(volumen)
+    sonido_muere_personaje = pygame.mixer.Sound(UBICACION_SONIDO_RANGER_MUERE)
+    sonido_muere_enemigo = pygame.mixer.Sound(UBICACION_SONIDO_ENEMIGO_MUERE)
     #TEXTO
     fuente = pygame.font.SysFont("Arial", 100)
     perdiste_texto = fuente.render("Perdiste!", 0, "Red")
     #FONDO
-    fondo = pygame.image.load("fondo_ciudad.jpg")
+    fondo = pygame.image.load("fondos/fondo_ciudad.jpg")
     fondo = pygame.transform.scale(fondo, (W,H))
     #FPS
     FPS = 15
@@ -694,36 +871,49 @@ def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
     #PLATAFORMAS
     piso.top = personaje.rect.bottom
     lados_piso = obtener_rectangulos(piso)
-    plataforma_1 = Plataforma(380, 460, ("fondos/13.png"))
-    plataforma_2 = Plataforma(1000, 460, ("fondos/14.png"))
+    plataforma_1 = Plataforma(580, 460, ("fondos/13.png"))
+    plataforma_2 = Plataforma(1080, 460, ("fondos/7.png"))
+    plataforma_3 = Plataforma(958, 460, ("fondos/7.png"))
     lados_plataforma = obtener_rectangulos(plataforma_1.rect)
     lados_plataforma_2 = obtener_rectangulos(plataforma_2.rect)
-    lista_plataformas = [lados_piso, lados_plataforma, lados_plataforma_2]
+    lados_plataforma_3 = obtener_rectangulos(plataforma_3.rect)
+    lista_plataformas = [lados_piso, lados_plataforma, lados_plataforma_2, lados_plataforma_3]
     grupo_plataformas = pygame.sprite.Group()
-    grupo_plataformas.add(plataforma_1, plataforma_2)
+    grupo_plataformas.add(plataforma_1, plataforma_2, plataforma_3)
     #ENEMIGO
     grupo_enemigos = Enemigo.generar_enemigos(4)
     #ESPADA
     espada = Espada(H/2 -230, 430, 40)
     rectangulo_espada = pygame.Rect(espada.x,espada.y,espada.z,espada.z)
+    rectangulo_espada_izquierda = pygame.Rect(espada.x, espada.y,espada.z,espada.z)
     lados_espada = obtener_rectangulos(rectangulo_espada)
+    lados_espada_izquierda = obtener_rectangulos(rectangulo_espada_izquierda)
     #ORBE
-    orbe = Orbe(480, 390)
+    orbe = Orbe(H/2 -250, 390)
     grupo_orbes = pygame.sprite.Group()
     grupo_orbes.add(orbe)
     #PUNTUACION 
     enemigos_eliminados = 0
-    nivel = 1
+    nivel = 3
     puntuacion = 0
-    tiempo = 0
+    tiempo = 180000
     juego_corriendo = True
+    vidas = 3
+    tiempo_colision = 0
     #BOSS
     boss = Boss()
     boss_lados = obtener_rectangulos(boss.rect)
 
     while juego_corriendo:
         milisegundos = RELOJ.tick(FPS)
-        tiempo += milisegundos
+        tiempo -= milisegundos
+        if tiempo < 0:
+            sonido_muere_personaje.play()
+            PANTALLA.blit(fondo_perdiste, (0,0))
+            PANTALLA.blit(perdiste_texto, (450, 250))
+            pygame.display.flip()
+            time.sleep(2)
+            perdiste(puntuacion, volumen)
         #EVENTOS 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -738,10 +928,14 @@ def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
 
         personaje.update()
         rectangulo_espada.x = personaje.rect.x +45
-        rectangulo_espada.y = personaje.rect.y 
+        rectangulo_espada.y = personaje.rect.y
+        rectangulo_espada_izquierda.x = personaje.rect.x -45
+        rectangulo_espada_izquierda.y = personaje.rect.y 
         lados_espada = obtener_rectangulos(rectangulo_espada)
+        lados_espada_izquierda = obtener_rectangulos(rectangulo_espada_izquierda)
         personaje.esta_saltando = False
         orbe.update()
+        boss.update()
 
         if personaje.lados["main"].colliderect(orbe.rect):
             personaje.tiene_escudo = True
@@ -752,45 +946,106 @@ def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
         grupo_plataformas.update()
         grupo_plataformas.draw(PANTALLA)
 
-        boss.update()
-        PANTALLA.blit(boss.imagen, boss.rect)
-
-        for proyectil in proyectiles_juego:
-            proyectil.update()
-            PANTALLA.blit(proyectil.imagen, proyectil.rect)
-        boss.shoot_proyectil()
-        pygame.display.update()
-
         for enemigo in grupo_enemigos:
-            if personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo==False:
-                print("Personaje eliminado!")
-                PANTALLA.blit(fondo_perdiste, (0,0))
-                PANTALLA.blit(perdiste_texto, (450, 250))
-                pygame.display.flip()
-                time.sleep(2)
-                perdiste(puntuacion, volumen)
-            elif personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo==True:
-                print("ataque bloqueado")
-                personaje.tiene_escudo = False
-            elif personaje.que_hace == "Atacando" and enemigo.lados["main"].colliderect(rectangulo_espada):
+            if personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo == False and vidas == 0:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700: 
+                    sonido_muere_personaje.play()
+                    print("Personaje eliminado!")
+                    PANTALLA.blit(fondo_perdiste, (0,0))
+                    PANTALLA.blit(perdiste_texto, (450, 250))
+                    pygame.display.flip()
+                    time.sleep(2)
+                    perdiste(puntuacion, volumen)
+            elif personaje.lados["main"].colliderect(enemigo.lados["main"]) and personaje.tiene_escudo == True:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700:
+                    print("ataque bloqueado")
+                    personaje.tiene_escudo = False
+                    tiempo_colision = 0 
+            elif personaje.lados['main'].colliderect(enemigo.lados['main']) and personaje.tiene_escudo == False:
+                tiempo_colision += pygame.time.get_ticks() - tiempo_anterior  
+                if tiempo_colision >= 700:
+                    vidas -= 1
+                    tiempo_colision = 0
+            elif (personaje.que_hace == "Ataque_derecha" and lados_espada['main'].colliderect(boss.rect)) or (personaje.que_hace == "Ataque_izquierda" and lados_espada_izquierda['main'].colliderect(boss.rect)):
+                if boss.delay_proyectil >= boss.DELAY_MAX:
+                    boss.colisiones_proyectil += 1
+                    boss.delay_proyectil = 0  # Reiniciar el retraso
+                    if boss.colisiones_proyectil >= 8:
+                        puntuacion += 200
+                        sonido_muere_enemigo.play()
+                        ganaste(puntuacion, volumen)
+                else:
+                    boss.delay_proyectil += pygame.time.get_ticks() - boss.delay_proyectil
+            elif (personaje.que_hace == "Ataque_derecha" and enemigo.lados["main"].colliderect(rectangulo_espada))or(personaje.que_hace == "Ataque_izquierda" and enemigo.lados["main"].colliderect(rectangulo_espada_izquierda)):
+                sonido_muere_enemigo.play()
                 animar_muerte_enemigo(PANTALLA, enemigo_muere, enemigo.lados["main"])
                 eliminar_enemigo(enemigo.lados["main"])
                 print("Enemigo eliminado por ataque de espada!")
                 grupo_enemigos = Enemigo.agregar_enemigos(grupo_enemigos, 1)
                 puntuacion += 50
                 enemigos_eliminados += 1
+                if vidas < 3:
+                    vidas += 1
             enemigo.update(grupo_plataformas)
+            tiempo_anterior = pygame.time.get_ticks()
 
-        if enemigos_eliminados > 5:
-            ganaste(puntuacion, volumen)
+        actualizar_pantalla_boss(PANTALLA, lista_plataformas, grupo_enemigos, grupo_plataformas, orbe, personaje, boss)
 
-        actualizar_pantalla(PANTALLA, personaje.que_hace, personaje.lados, personaje.velocidad, lista_plataformas, enemigo.que_hace, enemigo.lados)
+        for proyectil_boss in proyectiles_juego:
+            proyectil_boss.update()
+            PANTALLA.blit(proyectil_boss.imagen, proyectil_boss.rect)
+            if proyectil_boss.rect.colliderect(personaje.rect) and personaje.tiene_escudo == True:
+                personaje.tiene_escudo = False
+                proyectil_boss.kill()
+            if proyectil_boss.rect.colliderect(personaje.rect) and personaje.tiene_escudo == False:
+                vidas -= 1
+                proyectil_boss.kill()
+            if proyectil_boss.rect.colliderect(personaje.rect) and personaje.tiene_escudo == False and vidas == 0:
+                sonido_muere_personaje.play()
+                print("Personaje eliminado!")
+                PANTALLA.blit(fondo_perdiste, (0,0))
+                PANTALLA.blit(perdiste_texto, (450, 250))
+                pygame.display.flip()
+                time.sleep(2)
+                perdiste(puntuacion, volumen)
+                proyectil_boss.kill()
+        boss.disparo()
+
+        for proyectil in proyectiles_juego_personaje:
+            proyectil.update()
+            PANTALLA.blit(proyectil.imagen, proyectil.rect)
+            for enemigo in grupo_enemigos:
+                if proyectil.rect.colliderect(enemigo.rect):
+                    sonido_muere_enemigo.play()
+                    animar_muerte_enemigo(PANTALLA, enemigo_muere, enemigo.lados['main'])
+                    eliminar_enemigo(enemigo.lados['main'])
+                    grupo_enemigos = Enemigo.agregar_enemigos(grupo_enemigos, 1)
+                    proyectil.kill()
+                    puntuacion += 70
+                    enemigos_eliminados += 1
+                if proyectil.rect.colliderect(boss.rect):
+                    proyectil.kill()
+                    if boss.delay_proyectil >= boss.DELAY_MAX:
+                        boss.colisiones_proyectil += 1
+                        boss.delay_proyectil = 0 
+                        print("Colisiones de proyectil:", boss.colisiones_proyectil)
+                        if boss.colisiones_proyectil >= 8:
+                            puntuacion += 200
+                            sonido_muere_enemigo.play()
+                            ganaste(puntuacion, volumen)
+                    else:
+                        boss.delay_proyectil += pygame.time.get_ticks() - boss.delay_proyectil
+
         if get_mode():
             for lado in personaje.lados:
                 pygame.draw.rect(PANTALLA, "Blue", personaje.lados[lado], 2)
 
             for lado in lados_espada:
                 pygame.draw.rect(PANTALLA, "Red", lados_espada[lado], 2)
+            for lado in lados_espada_izquierda:
+                pygame.draw.rect(PANTALLA, "Red", lados_espada_izquierda[lado], 2)
 
             for lado in lados_piso:
                 pygame.draw.rect(PANTALLA, "Green", lados_piso[lado], 2)
@@ -798,6 +1053,7 @@ def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
             for lado in lados_plataforma:
                 pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma[lado], 2)
                 pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_2[lado], 2)
+                pygame.draw.rect(PANTALLA, "Yellow", lados_plataforma_3[lado], 2)
 
             for enemigo in grupo_enemigos:
                 for lado in enemigo.lados:
@@ -814,6 +1070,5 @@ def bucle_de_juego_nivel_3(volumen_parametro = 0.2):
             retorno = pausa(volumen)
             volumen = retorno['volumen']
             tiempo -= retorno['tiempo_pausa']
-        on_off_boton.on_off_volumen(PANTALLA)         
-        mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo)
+        mostrar_resultados(PANTALLA, enemigos_eliminados, puntuacion, nivel, tiempo, vidas, personaje.tiene_escudo)
         pygame.display.flip()

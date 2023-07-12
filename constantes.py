@@ -11,6 +11,9 @@ contador_muerte = 0
 
 piso = pygame.Rect(0,0,W,20)
 
+fondo = pygame.image.load("fondos/fondo_ciudad.jpg")
+fondo = pygame.transform.scale(fondo, (W,H))
+
 PANTALLA = pygame.display.set_mode((W,H))
 def girar_imagenes(lista_original, flip_x: bool, flip_y: bool)-> list:
     lista_girada = []
@@ -26,11 +29,11 @@ def reescalar_imagen(lista_animaciones, W, H):
             lista[i] = pygame.transform.scale(imagen, (W,H))
 
 #FONDOS
-UBICACION_FONDO_INICIO = "fondo_inicio.png"
-UBICACION_FONDO_PAUSA = "fondo_opciones.png"
-UBICACION_FONDO_PERDISTE = "fondo_perdiste.png"
-UBICACION_FONDO_RANKING = "fondo_ranking.png"
-UBICACION_FONDO_GANASTE = "fondo_ganaste.png"
+UBICACION_FONDO_INICIO = "fondos/fondo_inicio.png"
+UBICACION_FONDO_PAUSA = "fondos/fondo_opciones.png"
+UBICACION_FONDO_PERDISTE = "fondos/fondo_perdiste.png"
+UBICACION_FONDO_RANKING = "fondos/fondo_ranking.png"
+UBICACION_FONDO_GANASTE = "fondos/fondo_ganaste.png"
 
 #BOTONES
 UBICACION_BOTON_JUGAR = "botones/jugar.png"
@@ -48,7 +51,14 @@ UBICACION_BOTON_ON_OFF_SONIDO = "botones/Volume.png"
 #AUDIO 
 UBICACION_SONIDO_CLICK = "audio/click.mp3"
 UBICACION_SONIDO_INICIAR = "audio/iniciar.mp3"
-UBICACION_SONIDO_MUSICA_MENU = "audio/musica_menu.mp3"
+UBICACION_SONIDO_MUSICA_MENU = "audio/rangers_song.mp3"
+UBICACION_SONIDO_ATAQUE_ESPADA = "audio/espada.wav"
+UBICACION_SONIDO_PROYECTIL = "audio/proyectil.wav"
+UBICACION_SONIDO_NIVEL_1 = "audio/level_1.wav"
+UBICACION_SONIDO_NIVEL_2 = "audio/level_2.wav"
+UBICACION_SONIDO_NIVEL_3 = "audio/level_3.wav"
+UBICACION_SONIDO_ENEMIGO_MUERE = "audio/enemigo_muere.wav"
+UBICACION_SONIDO_RANGER_MUERE = "audio/muere_ranger.wav"
 
 #PERSONAJE
 personaje_quieto = [
@@ -75,7 +85,9 @@ ataque_espada = [
     pygame.image.load("ranger/ataque espada/92.png")
     ]
 personaje_camina_izquierda = girar_imagenes(personaje_camina, True, False)
-lista_animaciones = [personaje_quieto, personaje_camina, personaje_camina_izquierda, personaje_salta]
+personaje_quieto_izquierda = girar_imagenes(personaje_quieto, True, False)
+ataque_espada_izquierda = girar_imagenes(ataque_espada, True, False)
+lista_animaciones = [personaje_quieto, personaje_camina, personaje_camina_izquierda, personaje_salta, personaje_quieto_izquierda]
 imagenes_reescaladas = reescalar_imagen(lista_animaciones, 30, 70)
 
 #ENEMIGO
